@@ -1,0 +1,17 @@
+{
+    "products": [
+        {
+            "id": "PRJ-1782847084",
+            "name": "تطبيق_إدارة_المهام_الذكي",
+            "type": "Full-Stack Microservice",
+            "price": "150.00 DC",
+            "status": "Verified & Ready",
+            "tech_stack": [
+                "Node.js",
+                "Docker",
+                "AI Reviewed"
+            ],
+            "container_ready": true
+        }
+    ]
+}

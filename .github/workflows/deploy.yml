@@ -1,0 +1,17 @@
+name: Wolf Production Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Tests
+        run: |
+          pip install -r requirements.txt
+          pytest tests/
+      - name: Build Docker
+        run: docker build -t wolf-app .

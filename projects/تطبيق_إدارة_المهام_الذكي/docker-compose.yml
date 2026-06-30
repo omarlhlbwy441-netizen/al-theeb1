@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  task_manager_app:
+    build: .
+    container_name: تطبيق_إدارة_المهام_الذكي_container
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SYSTEM_CORE=design_engine
+    restart: unless-stopped

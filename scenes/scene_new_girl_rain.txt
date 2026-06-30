@@ -1,0 +1,1 @@
+{'action': 'generate_video', 'description': 'فتاة تقف تحت المطر في مشهد سينمائي', 'style': 'cinematic', 'weather': 'rain'}

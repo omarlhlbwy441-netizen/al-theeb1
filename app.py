@@ -1,16 +1,11 @@
-from fastapi import FastAPI, HTTPException
+
+import os
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from studio import WolfEngine
-from backend.finance.wallet import DualCurrencyWallet
 
-app = FastAPI(
-    title="Wolf Super App & AI Engine API",
-    description="الواجهة البرمجية المركزية لإدارة أنظمة الذكاء الاصطناعي، المحافظ المالية، والاستوديو الرقمي للإنتاج",
-    version="1.0.0"
-)
+app = FastAPI(title="Design System Gateway")
 
-# تفعيل الـ CORS للسماح لواجهات العرض والمتصفحات بالاتصال الآمن بالسيرفر
+# السماح لواجهة الويب (React) بالاتصال بالخادم
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,58 +14,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-studio = WolfEngine()
-wallet = DualCurrencyWallet()
-
-class LoreInput(BaseModel):
-    category: str
-    title: str
-    description: str
-
-class SceneInput(BaseModel):
-    scene_id: str
-    title: str
-    content: str
-
-class PromptInput(BaseModel):
-    title: str
-    description: str
-
-class DepositInput(BaseModel):
-    amount: float
-
-@app.get("/")
-def read_root():
-    return {
-        "status": "online",
-        "message": "🐺 خادم Wolf AI يعمل بكفاءة ككتلة ويب موحدة ومستقرة",
-        "system_balances": wallet.get_balances()
-    }
-
-@app.get("/wallet/balance")
-def get_balance():
-    return {"balances": wallet.get_balances(), "raw_data": wallet.data}
-
-@app.post("/wallet/deposit")
-def deposit_tokens(payload: DepositInput):
-    wallet.data["wolf_tokens"] += payload.amount
-    wallet.save_wallet()
-    return {"message": f"✅ تم شحن {payload.amount} عملة وولف بنجاح", "balances": wallet.get_balances()}
-
-@app.post("/studio/lore")
-def add_new_lore(payload: LoreInput):
-    result = studio.add_lore(payload.category, payload.title, payload.description)
-    return {"message": result}
-
-@app.post("/studio/scene")
-def create_new_scene(payload: SceneInput):
-    success, msg = wallet.process_transaction(10, "wolf_tokens")
-    if not success:
-        raise HTTPException(status_code=402, detail=msg)
-    result = studio.create_scene(payload.scene_id, payload.title, payload.content)
-    return {"transaction_status": msg, "studio_result": result}
-
-@app.post("/studio/prompt")
-def generate_ai_prompt(payload: PromptInput):
-    result = studio.generate_prompt(payload.title, payload.description)
-    return {"message": result}
+@app.get("/api/projects")
+def get_generated_projects():
+    projects_dir = "projects"
+    if not os.path.exists(projects_dir):
+        return {"projects": []}
+    
+    project_list = []
+    for proj_name in os.listdir(projects_dir):
+        proj_path = os.path.join(projects_dir, proj_name)
+        if os.path.isdir(proj_path):
+            files = os.listdir(proj_path)
+            project_list.append({
+                "name": proj_name,
+                "files_count": len(files),
+                "files": files
+            })
+            
+    return {"status": "success", "projects": project_list}

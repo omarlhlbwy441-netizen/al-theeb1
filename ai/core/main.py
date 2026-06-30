@@ -1,18 +1,19 @@
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-app = FastAPI(title="Wolf AI & Voice Core")
+app = FastAPI(title="Wolf AI Core")
 
-class QueryRequest(BaseModel):
-    user_input: str
+class ChatRequest(BaseModel):
+    user_id: int
+    message: str
 
-@app.post("/generate_code")
-async def generate_code(req: QueryRequest):
-    # مسار مربوط بـ OpenAI/Claude
-    return {"status": "success", "data": "Code generated via AI"}
-
-@app.post("/speech_to_text")
-async def process_voice(audio_data: bytes):
-    # مسار مربوط بـ Whisper API
-    return {"status": "success", "text": "تم تحويل الصوت إلى نص"}
+@app.post("/api/ai/chat")
+async def chat_with_ai(req: ChatRequest):
+    # هنا يتم الربط الفعلي بمكتبة OpenAI أو Claude
+    response_text = f"مرحباً يا ملك الذئاب.. لقد استلمت رسالتك: '{req.message}'. جاري التنفيذ!"
+    
+    return {
+        "role": "assistant",
+        "content": response_text,
+        "status": "success"
+    }

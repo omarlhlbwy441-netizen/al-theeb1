@@ -1,8 +1,4 @@
-fastapi
-uvicorn
-jinja2
-python-jose[cryptography]
-passlib[bcrypt]
-chromadb
-sqlalchemy
-pydantic
+fastapi==0.110.0
+uvicorn==0.28.0
+pydantic==2.6.4
+pandas==2.2.1

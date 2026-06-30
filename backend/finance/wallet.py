@@ -1,28 +1,52 @@
+import sqlite3
 import json
+import os
+from datetime import datetime
 
 class DualCurrencyWallet:
-    def __init__(self, wallet_file="backend/finance/wallet_data.json"):
-        self.wallet_file = wallet_file
+    """نظام إدارة المحفظة المزدوجة المربوط علائقياً بدفتر الأستاذ المالي الموحد"""
+    
+    def __init__(self, db_path="database/wolf_archive.db", config_path="backend/finance/wallet_config.json"):
+        self.db_path = db_path
+        self.config_path = config_path
+        self.data = {"wolf_tokens": 870.0, "fiat_credits": 1000.0}
         self.load_wallet()
 
     def load_wallet(self):
-        try:
-            with open(self.wallet_file, "r", encoding="utf-8") as f:
+        """تحميل الأرصدة المستقرة من ملف التكوين المحمي"""
+        if os.path.exists(self.config_path):
+            with open(self.config_path, "r", encoding="utf-8") as f:
                 self.data = json.load(f)
-        except FileNotFoundError:
-            self.data = {"fiat_credits": 1000.0, "wolf_tokens": 500.0}
+        else:
             self.save_wallet()
 
     def save_wallet(self):
-        with open(self.wallet_file, "w", encoding="utf-8") as f:
+        """حفظ نسخة الحقيقة السريعة للأرصدة"""
+        with open(self.config_path, "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False, indent=4)
 
-    def get_balances(self):
-        return f"💳 رصيد المحفظة الديجيتال: {self.data['fiat_credits']} كاش | {self.data['wolf_tokens']} عملة وولف التفاعلية"
-
-    def process_transaction(self, amount, currency_type="wolf_tokens"):
-        if currency_type in self.data and self.data[currency_type] >= amount:
-            self.data[currency_type] -= amount
-            self.save_wallet()
+    def process_transaction(self, amount: float, currency_type: str = "wolf_tokens") -> tuple:
+        """معالجة وخصم المعاملات المالية فورياً وتوثيقها بداخل قاعدة البيانات العلائقية"""
+        if self.data[currency_type] < amount:
+            return False, "❌ خطأ مالي: الرصيد المتوفر غير كافٍ لإتمام هذه العملية."
+        
+        # تنفيذ الخصم البرمجي
+        self.data[currency_type] -= amount
+        self.save_wallet()
+        
+        # التوثيق الفوري في SQLite كـ Audit Log للمستثمرين
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            cursor.execute('''
+                INSERT INTO financial_ledger (transaction_type, amount, currency_type, status, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (f"System_Deduction", -amount, currency_type.upper(), "SUCCESS", timestamp))
+            
+            conn.commit()
+            conn.close()
             return True, f"✅ تمت العملية بنجاح. خصم {amount} من {currency_type}"
-        return False, "❌ رصيد غير كافٍ لإتمام العملية البرمجية."
+        except Exception as e:
+            return True, f"⚠️ تم الخصم برمجياً وفشل التوثيق العلائقي: {str(e)}"

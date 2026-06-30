@@ -50,3 +50,26 @@ class DualCurrencyWallet:
             return True, f"✅ تمت العملية بنجاح. خصم {amount} من {currency_type}"
         except Exception as e:
             return True, f"⚠️ تم الخصم برمجياً وفشل التوثيق العلائقي: {str(e)}"
+
+
+def process_purchase(user_id, product_id, wallet):
+    # 1. جلب بيانات المنتج
+    with open("backend/store/store_db.json", "r") as f:
+        store_data = json.load(f)
+    
+    product = next((p for p in store_data['products'] if p['id'] == product_id), None)
+    
+    if not product:
+        return {"status": "error", "message": "المنتج غير موجود."}
+    
+    # 2. التحقق من الرصيد والخصم
+    price = float(product['price'].split(' ')[0])
+    if wallet.balance >= price:
+        wallet.balance -= price
+        return {
+            "status": "success", 
+            "message": f"تم شراء {product['name']} بنجاح!",
+            "product_access_link": f"/archive/downloads/{product_id}"
+        }
+    else:
+        return {"status": "error", "message": "رصيد غير كافٍ."}

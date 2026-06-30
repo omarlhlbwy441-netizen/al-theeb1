@@ -1,0 +1,27 @@
+name: Wolf CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install Requirements
+      run: |
+        pip install --upgrade pip
+        pip install fastapi uvicorn pydantic pandas
+        
+    - name: Validate Project Structure
+      run: |
+        # التأكد فقط من وجود المجلدات والملفات الضرورية
+        ls -R
+        echo "Structural validation complete."

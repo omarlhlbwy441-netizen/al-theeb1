@@ -30,15 +30,15 @@ def main():
             print("[1] إضافة Lore للأرشيف | [2] إنتاج مشهد وفيديو تلقائي | [3] توليد Prompt سينمائي")
             sub_choice = os.getenv("sub_choice", "1")
             if sub_choice == '1':
-                print(studio.add_lore(input("التصنيف: "), input("العنوان: "), input("التفاصيل: ")))
+                print(studio.add_lore("تصنيف_تلقائي"("التصنيف: "), "تصنيف_تلقائي"("العنوان: "), "تصنيف_تلقائي"("التفاصيل: ")))
             elif sub_choice == '2':
                 # تكامل مالي: إنتاج المشاهد يستهلك من نقاط المنظومة التفاعلية
                 success, msg = wallet.process_transaction(10, "wolf_tokens")
                 print(msg)
                 if success:
-                    print(studio.create_scene(input("رقم المشهد: "), input("عنوان القصة: "), input("تفاصيل المشهد والأحداث: ")))
+                    print(studio.create_scene("تصنيف_تلقائي"("رقم المشهد: "), "تصنيف_تلقائي"("عنوان القصة: "), "تصنيف_تلقائي"("تفاصيل المشهد والأحداث: ")))
             elif sub_choice == '3':
-                print(studio.generate_prompt(input("عنوان الموجه الإبداعي: "), input("الوصف التفصيلي للبصريات: ")))
+                print(studio.generate_prompt("تصنيف_تلقائي"("عنوان الموجه الإبداعي: "), "تصنيف_تلقائي"("الوصف التفصيلي للبصريات: ")))
                 
         elif choice == '2':
             print(f"\n--- 💳 النظام المالي المركزي ---\n{wallet.balance}")
@@ -53,7 +53,7 @@ def main():
             print("\n--- 🎮 محرك الألعاب ومنطق الذكاء الاصطناعي ---")
             print("📦 هيكلية Unity ومخططات الـ Game Logic تعمل بالتوازي وثابتة برمجياً.")
             print("🔊 نظام الـ Audio Pipeline (ai/voice) جاهز لاستقبال ملفات الهندسة الصوتية.")
-            input("[اضغط Enter للعودة]")
+            "تصنيف_تلقائي"("[اضغط Enter للعودة]")
             
         elif choice == 'exit':
             print("\n🐺 تم حفظ كافة التغييرات وإغلاق الكتلة الموحدة بأمان.")

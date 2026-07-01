@@ -63,3 +63,4 @@ studio.add_lore("تصنيف_تلقائي")
 
 if __name__ == "__main__":
     main()
+

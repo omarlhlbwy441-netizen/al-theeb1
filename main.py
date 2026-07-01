@@ -23,7 +23,7 @@ def main():
         print("[3] موديول الألغاز وتوليد مخططات الألعاب (Game Engine)")
         print("[exit] إغلاق المنظومة")
         
-        choice = input("\nاختر رقم الإجراء: ").strip().lower()
+        choice = os.getenv("APP_MODE", "1").lower()
         
         if choice == '1':
             print("\n--- 🐺 الاستوديو الرقمي الفعال ---")
@@ -43,7 +43,7 @@ def main():
         elif choice == '2':
             print(f"\n--- 💳 النظام المالي المركزي ---\n{wallet.balance}")
             # محاكاة شحن الرصيد
-            deposit_choice = input("هل ترغب في شحن العملة التفاعلية للمنظومة؟ (yes/no): ").strip().lower()
+            deposit_choice = os.getenv("APP_MODE", "1").lower()
             if deposit_choice == 'yes':
                 wallet.data["wolf_tokens"] += 100
                 wallet.save_wallet()

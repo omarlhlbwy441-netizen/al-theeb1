@@ -1,4 +1,3 @@
-
 import os
 import sqlite3
 from flask import Flask, render_template_string, request, redirect, url_for, session
@@ -6,8 +5,10 @@ from flask import Flask, render_template_string, request, redirect, url_for, ses
 app = Flask(__name__)
 app.secret_key = 'al-theeb-secret-key-2026'
 
+DB_PATH = '/tmp/database.db'
+
 def init_db():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute('CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, balance REAL)')
     cursor.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)')
@@ -18,7 +19,7 @@ def init_db():
 init_db()
 
 def get_db():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -35,7 +36,8 @@ def login():
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
     conn = get_db()
-    balance = conn.execute('SELECT balance FROM users WHERE username = ?', ('admin',)).fetchone()['balance']
+    user = conn.execute('SELECT balance FROM users WHERE username = ?', ('admin',)).fetchone()
+    balance = user['balance'] if user else 0
     conn.close()
     return render_template_string('''
     <div style="text-align:center; padding:50px; background:#0f3460; color:white; font-family: sans-serif;">
@@ -70,3 +72,7 @@ def log_action(action):
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)

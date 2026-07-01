@@ -27,5 +27,6 @@ def login():
     return jsonify({"message": "تمت محاولة تسجيل الدخول بنجاح!"})
 
 if __name__ == '__main__':
-    # تم إيقاف التشغيل المحلي لمنع رسائل السيرفر
-    print("تم إعداد التطبيق للعمل على Railway.")
+    # تحديد المنفذ 8080 كما طلبت
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)

@@ -1,47 +1,29 @@
 import os
+import sqlite3
 from flask import Flask, render_template_string, request, redirect, url_for, session
 
 app = Flask(__name__)
 app.secret_key = 'al-theeb-secret-key-2026'
 
-# الواجهات بتصميم فخم
-login_html = '''
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><style>
-    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; color: white; }
-    .login-card { background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(8px); width: 300px; text-align: center; }
-    input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: rgba(255, 255, 255, 0.2); color: white; }
-    button { width: 100%; padding: 12px; margin-top: 20px; border-radius: 10px; border: none; background: #e94560; color: white; font-weight: bold; cursor: pointer; }
-</style></head>
-<body>
-    <div class="login-card">
-        <h1>دخول الذئب</h1>
-        <form action="/" method="post">
-            <input type="text" name="username" placeholder="اسم المستخدم" required>
-            <input type="password" name="password" placeholder="كلمة المرور" required>
-            <button type="submit">دخول</button>
-        </form>
-    </div>
-</body>
-</html>
-'''
+def init_db():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, balance REAL)')
+    cursor.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)')
+    cursor.execute('INSERT OR IGNORE INTO users VALUES (?, ?)', ('admin', 1000.0))
+    conn.commit()
+    conn.close()
+
+init_db()
 
 dashboard_html = '''
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head><meta charset="UTF-8"><style>
-    body { font-family: 'Segoe UI', sans-serif; background: #0f3460; color: white; text-align: center; padding: 50px; }
-    .btn { display: inline-block; padding: 15px 30px; margin: 10px; background: #e94560; border-radius: 10px; text-decoration: none; color: white; font-weight: bold; }
-</style></head>
-<body>
+<div style="text-align:center; padding:50px; background:#0f3460; color:white; font-family: sans-serif;">
     <h1>لوحة تحكم الذئب الملكي</h1>
-    <h3>💰 رصيد المحفظة: $1,000</h3>
-    <a href="/create-scene" class="btn">إنشاء مشهد تفاعلي</a>
-    <a href="/generate-prompt" class="btn">توليد موجه (Prompt)</a>
-    <br><a href="/logout">تسجيل خروج</a>
-</body>
-</html>
+    <h3>💰 الرصيد المتبقي: ${{ balance }}</h3>
+    <a href="/log-action/إنشاء مشهد" style="background:#e94560; padding:15px; margin:10px; color:white; text-decoration:none; border-radius:10px;">إنشاء مشهد</a>
+    <a href="/log-action/توليد موجه" style="background:#e94560; padding:15px; margin:10px; color:white; text-decoration:none; border-radius:10px;">توليد موجه</a>
+    <br><br><a href="/logout" style="color:white;">تسجيل خروج</a>
+</div>
 '''
 
 @app.route('/', methods=['GET', 'POST'])
@@ -50,29 +32,33 @@ def login():
         if request.form.get('username') == 'admin' and request.form.get('password') == '159159':
             session['user'] = 'admin'
             return redirect(url_for('dashboard'))
-        return "<h1>بيانات الدخول خاطئة!</h1>"
-    return render_template_string(login_html)
+        return "خطأ في الدخول"
+    return "<h1>دخول المسؤول</h1><form method='post'><input name='username' placeholder='Username'><input name='password' type='password' placeholder='Password'><button>دخول</button></form>"
 
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session: return redirect(url_for('login'))
-    return render_template_string(dashboard_html)
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT balance FROM users WHERE username = ?', ('admin',))
+    balance = cursor.fetchone()[0]
+    conn.close()
+    return render_template_string(dashboard_html, balance=balance)
 
-@app.route('/create-scene')
-def create_scene():
+@app.route('/log-action/<action>')
+def log_action(action):
     if 'user' not in session: return redirect(url_for('login'))
-    return "<h1>✅ تم إنشاء المشهد بنجاح!</h1><a href='/dashboard'>العودة</a>"
-
-@app.route('/generate-prompt')
-def generate_prompt():
-    if 'user' not in session: return redirect(url_for('login'))
-    return "<h1>✨ تم توليد الموجه بنجاح!</h1><a href='/dashboard'>العودة</a>"
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO logs (action) VALUES (?)', (action,))
+    cursor.execute('UPDATE users SET balance = balance - 10 WHERE username = ?', ('admin',))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('dashboard'))
 
 @app.route('/logout')
 def logout():
-    session.pop('user', None)
+    session.clear()
     return redirect(url_for('login'))
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+# تم إيقاف التشغيل المحلي لمنع تضارب المنافذ في كولاب

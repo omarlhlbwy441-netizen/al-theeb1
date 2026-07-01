@@ -1,4 +1,7 @@
 import os
+port = int(os.getenv('PORT', 8000))
+print(f'النظام يعمل الآن على المنفذ: {port}')
+import os
 import sys
 from studio import WolfEngine
 from backend.finance.wallet import DualCurrencyWallet

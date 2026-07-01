@@ -1,10 +1,10 @@
 import os
 import sqlite3
-from flask import Flask, render_template_string, request, redirect, url_for, session
+from flask import Flask, render_template_string, request, redirect, session
 
 app = Flask(__name__)
 app.secret_key = 'al-theeb-secret-key-2026'
-
+# المسار المعتمد في السحابة
 DB_PATH = '/tmp/database.db'
 
 def init_db():
@@ -18,61 +18,33 @@ def init_db():
 
 init_db()
 
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         if request.form.get('username') == 'admin' and request.form.get('password') == '159159':
             session['user'] = 'admin'
-            return redirect(url_for('dashboard'))
-        return "<h1>بيانات الدخول خاطئة</h1><a href='/'>رجوع</a>"
-    return "<h1>دخول المسؤول</h1><form method='post'><input name='username' placeholder='Username'><input name='password' type='password' placeholder='Password'><button>دخول</button></form>"
+            return redirect('/dashboard')
+        return "خطأ في الدخول"
+    return render_template_string('<body style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0f3460; margin:0;"><form method="post" style="background:#fff; padding:20px; border-radius:10px;"><input name="username" placeholder="User" required><br><br><input name="password" type="password" placeholder="Pass" required><br><br><button>دخول</button></form></body>')
 
 @app.route('/dashboard')
 def dashboard():
-    if 'user' not in session: return redirect(url_for('login'))
-    conn = get_db()
+    if 'user' not in session: return redirect('/')
+    conn = sqlite3.connect(DB_PATH)
     user = conn.execute('SELECT balance FROM users WHERE username = ?', ('admin',)).fetchone()
-    balance = user['balance'] if user else 0
     conn.close()
     return render_template_string('''
-    <div style="text-align:center; padding:50px; background:#0f3460; color:white; font-family: sans-serif;">
-        <h1>لوحة تحكم الذئب الملكي</h1>
-        <h3>💰 الرصيد المتبقي: ${{ balance }}</h3>
-        <a href="/log-action/إنشاء مشهد" style="background:#e94560; padding:15px; margin:10px; color:white; text-decoration:none; border-radius:10px;">إنشاء مشهد</a>
-        <a href="/log-action/توليد موجه" style="background:#e94560; padding:15px; margin:10px; color:white; text-decoration:none; border-radius:10px;">توليد موجه</a>
-        <br><br><a href="/view-logs" style="color:#00d2ff;">عرض سجل العمليات</a> | <a href="/logout" style="color:white;">خروج</a>
+    <div style="text-align:center; padding:20px; background:#0f3460; color:white; height:100vh; font-family:sans-serif;">
+        <h1>الذئب الملكي</h1>
+        <h2>الرصيد: ${{ balance }}</h2>
+        <a href="/action/10" style="display:block; padding:15px; background:#e94560; margin:10px; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">إنشاء مشهد</a>
     </div>
-    ''', balance=balance)
+    ''', balance=user[0])
 
-@app.route('/view-logs')
-def view_logs():
-    if 'user' not in session: return redirect(url_for('login'))
-    conn = get_db()
-    logs = conn.execute('SELECT * FROM logs ORDER BY timestamp DESC').fetchall()
-    conn.close()
-    items = "".join([f"<li>{l['timestamp']} - {l['action']}</li>" for l in logs])
-    return render_template_string(f"<h1>سجل العمليات</h1><ul>{items}</ul><br><a href='/dashboard'>العودة للوحة</a>")
-
-@app.route('/log-action/<action>')
-def log_action(action):
-    if 'user' not in session: return redirect(url_for('login'))
-    conn = get_db()
-    conn.execute('INSERT INTO logs (action) VALUES (?)', (action,))
-    conn.execute('UPDATE users SET balance = balance - 10 WHERE username = ?', ('admin',))
+@app.route('/action/<amount>')
+def action(amount):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute('UPDATE users SET balance = balance - ? WHERE username = ?', (amount, 'admin'))
     conn.commit()
     conn.close()
-    return redirect(url_for('dashboard'))
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    return redirect('/dashboard')

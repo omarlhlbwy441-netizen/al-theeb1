@@ -1,5 +1,2 @@
-database/wolf_archive.db
-backend/finance/wallet_config.json
 __pycache__/
 *.pyc
-.ipynb_checkpoints/

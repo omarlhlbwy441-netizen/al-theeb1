@@ -1,12 +1,12 @@
 import os
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, render_template_string, jsonify
 
 app = Flask(__name__)
 
 login_html = '''
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><title>تسجيل الدخول - الذيب</title></head>
+<head><meta charset="UTF-8"><title>الذيب - دخول</title></head>
 <body>
     <h1>مرحباً بك في الذيب</h1>
     <form action="/login" method="post">
@@ -24,9 +24,8 @@ def home():
 
 @app.route('/login', methods=['POST'])
 def login():
-    return jsonify({"message": "تمت محاولة تسجيل الدخول بنجاح!"})
+    return jsonify({"message": "تمت محاولة تسجيل الدخول!"})
 
 if __name__ == '__main__':
-    # تحديد المنفذ 8080 كما طلبت
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port)

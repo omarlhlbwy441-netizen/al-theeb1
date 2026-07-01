@@ -30,7 +30,7 @@ def main():
             print("[1] إضافة Lore للأرشيف | [2] إنتاج مشهد وفيديو تلقائي | [3] توليد Prompt سينمائي")
             sub_choice = os.getenv("sub_choice", "1")
             if sub_choice == '1':
-studio.add_lore("تصنيف_تلقائي")
+print("نظام الاستوديو يعمل في وضع الإنتاج التلقائي")
             elif sub_choice == '2':
                 # تكامل مالي: إنتاج المشاهد يستهلك من نقاط المنظومة التفاعلية
                 success, msg = wallet.process_transaction(10, "wolf_tokens")

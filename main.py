@@ -28,7 +28,7 @@ def main():
         if choice == '1':
             print("\n--- 🐺 الاستوديو الرقمي الفعال ---")
             print("[1] إضافة Lore للأرشيف | [2] إنتاج مشهد وفيديو تلقائي | [3] توليد Prompt سينمائي")
-            sub_choice = input("اختر الإجراء: ")
+            sub_choice = os.getenv("sub_choice", "1")
             if sub_choice == '1':
                 print(studio.add_lore(input("التصنيف: "), input("العنوان: "), input("التفاصيل: ")))
             elif sub_choice == '2':

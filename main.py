@@ -11,7 +11,7 @@ def main():
     print("🐺 كتلة WOLF SUPER APP & AI ENGINE | مفعلة بالكامل")
     print("==================================================")
     print("[🗄️] تم ربط قاعدة بيانات الـ Lore والسيناريوهات بنجاح.")
-    print(f"[💰] {wallet.get_balances()}")
+    print(f"[💰] {wallet.balance}")
     
     while True:
         print("\n🎛️ غرفة التحكم المركزية بالنظام:")
@@ -38,13 +38,13 @@ def main():
                 print(studio.generate_prompt(input("عنوان الموجه الإبداعي: "), input("الوصف التفصيلي للبصريات: ")))
                 
         elif choice == '2':
-            print(f"\n--- 💳 النظام المالي المركزي ---\n{wallet.get_balances()}")
+            print(f"\n--- 💳 النظام المالي المركزي ---\n{wallet.balance}")
             # محاكاة شحن الرصيد
             deposit_choice = input("هل ترغب في شحن العملة التفاعلية للمنظومة؟ (yes/no): ").strip().lower()
             if deposit_choice == 'yes':
                 wallet.data["wolf_tokens"] += 100
                 wallet.save_wallet()
-                print(f"✅ تم إضافة 100 نقطة دعم برمجية! {wallet.get_balances()}")
+                print(f"✅ تم إضافة 100 نقطة دعم برمجية! {wallet.balance}")
                 
         elif choice == '3':
             print("\n--- 🎮 محرك الألعاب ومنطق الذكاء الاصطناعي ---")
